@@ -1,0 +1,5 @@
+import { NextResponse } from "next/server";
+import { z } from "zod";
+import { createClient, createServiceRoleClient } from "@/lib/supabase/server";
+const schema = z.object({ id: z.string().uuid(), role: z.enum(["customer", "staff", "admin"]) });
+export async function PATCH(request: Request) { const input = schema.safeParse(await request.json()); if (!input.success) return NextResponse.json({ error: "Invalid user" }, { status: 400 }); const session = createClient(); const { data: { user } } = await session.auth.getUser(); const { data: me } = user ? await session.from("profiles").select("role").eq("id", user.id).single() : { data: null }; if (me?.role !== "admin") return NextResponse.json({ error: "Only administrators can change roles" }, { status: 403 }); const { error } = await createServiceRoleClient().from("profiles").update({ role: input.data.role }).eq("id", input.data.id); return error ? NextResponse.json({ error: "Could not update user" }, { status: 500 }) : NextResponse.json({ ok: true }); }

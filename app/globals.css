@@ -1,0 +1,34 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    color-scheme: light;
+  }
+  body {
+    min-height: 100vh;
+    background-image: radial-gradient(circle at 100% 0%, rgba(215, 230, 57, 0.16), transparent 28rem);
+  }
+  * {
+    @apply border-line;
+  }
+  :focus-visible {
+    outline: 2px solid theme(colors.court.DEFAULT);
+    outline-offset: 2px;
+  }
+  button, a, input, select {
+    transition: border-color 150ms ease, background-color 150ms ease, color 150ms ease, box-shadow 150ms ease;
+  }
+}
+
+@layer utilities {
+  /* The scoreboard number treatment used for prices and court numbers —
+     the one deliberately bold display element on the page. */
+  .score-num {
+    font-family: var(--font-display);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    font-variant-numeric: tabular-nums;
+  }
+}

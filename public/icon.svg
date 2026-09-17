@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Pickleball Club">
+  <rect width="512" height="512" rx="96" fill="#0F3D37"/>
+  <path d="M120 150h272M120 362h272M256 120v272" stroke="#F4F6F2" stroke-width="12" opacity=".82"/>
+  <circle cx="256" cy="256" r="92" fill="#D7E639"/>
+  <circle cx="224" cy="226" r="13" fill="#0F3D37"/><circle cx="288" cy="226" r="13" fill="#0F3D37"/>
+  <circle cx="224" cy="286" r="13" fill="#0F3D37"/><circle cx="288" cy="286" r="13" fill="#0F3D37"/>
+</svg>

@@ -1,0 +1,2 @@
+import { AvailabilityBoard } from "@/components/AvailabilityBoard";
+export default function AvailabilityPage() { return <div><p className="text-sm font-semibold uppercase tracking-[0.14em] text-court">Phone enquiry helper</p><h1 className="mt-1 font-display text-3xl font-bold">Court availability</h1><p className="mb-6 mt-1 text-sm text-ash">Select a date and tell callers the open one-hour start times. Existing bookings and maintenance blocks are excluded.</p><AvailabilityBoard /></div>; }

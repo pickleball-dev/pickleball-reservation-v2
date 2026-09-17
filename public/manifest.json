@@ -1,0 +1,12 @@
+{
+  "name": "Pickleball Club — Court Booking",
+  "short_name": "Pickleball",
+  "description": "Book a pickleball court in under a minute.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#F4F6F2",
+  "theme_color": "#0F3D37",
+  "icons": [
+    { "src": "/icon.svg", "sizes": "any", "type": "image/svg+xml" }
+  ]
+}
