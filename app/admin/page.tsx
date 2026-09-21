@@ -15,7 +15,7 @@ export default async function AdminDashboard() {
 
   const { data: reservations } = await supabase
     .from("reservations")
-    .select("*, courts(name)")
+    .select("*, courts(name), profiles(full_name)")
     .gte("starts_at", todayStart.toISOString())
     .lte("starts_at", todayEnd.toISOString())
     .in("status", ["pending_payment", "confirmed"])
@@ -71,7 +71,7 @@ export default async function AdminDashboard() {
                       )}
                     >
                       {formatTime(r.starts_at)}–{formatTime(r.ends_at)} ·{" "}
-                      {r.status === "confirmed" ? "PAID" : "PENDING"} · {formatPeso(r.total_amount)}
+                      {r.guest_name || r.profiles?.full_name || "Account customer"} · {r.status === "confirmed" ? "PAID" : "PENDING"} · {formatPeso(r.total_amount)}
                     </span>
                   ))}
                 </div>

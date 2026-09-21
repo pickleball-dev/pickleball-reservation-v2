@@ -84,7 +84,7 @@ export function BookingApp() {
         </div>
       </div>
 
-      <p className="mt-5 text-center text-xs text-ash">Open 24 hours · Bookings are held for 15 minutes while payment is submitted.</p>
+      <p className="mt-5 text-center text-xs text-ash">Open 24 hours · Booked times are unavailable for selection · Bookings are held for 15 minutes while payment is submitted.</p>
 
       <div className="space-y-3 sm:grid sm:grid-cols-2 sm:gap-3 sm:space-y-0">
         {loading &&

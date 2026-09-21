@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { calculatePrice, formatPeso } from "@/lib/pricing";
 import { generateTimeOptions, formatTime, isSlotAvailable } from "@/lib/availability";
 import type { AvailabilityBlock, Court } from "@/lib/types";
+import { createClient } from "@/lib/supabase/client";
 
 interface Props {
   court: Court;
@@ -26,6 +27,7 @@ export function BookingDrawer({ court, date, blocks, onClose }: Props) {
   const [guestName, setGuestName] = useState("");
   const [guestPhone, setGuestPhone] = useState("");
   const [holdSeconds, setHoldSeconds] = useState(15 * 60);
+  const [signedIn, setSignedIn] = useState(false);
 
   // The facility operates 24/7. "24:00" rolls over to midnight of the
   // following day, allowing late-night bookings without a separate UI.
@@ -37,6 +39,10 @@ export function BookingDrawer({ court, date, blocks, onClose }: Props) {
   }, [startsAt, hours]);
 
   const available = startsAt ? isSlotAvailable(blocks, court.id, startsAt, endsAt) : true;
+  const isStartAvailable = (start: string) => {
+    const end = new Date(new Date(start).getTime() + hours * 60 * 60 * 1000).toISOString();
+    return isSlotAvailable(blocks, court.id, start, end);
+  };
   const { total } = useMemo(() => {
   // If no start time selected yet, return a default
   if (!startsAt) return { hourlyRate: 0, hours: 0, total: 0 };
@@ -55,8 +61,16 @@ export function BookingDrawer({ court, date, blocks, onClose }: Props) {
     return () => clearTimeout(t);
   }, [step, holdSeconds]);
 
+  useEffect(() => {
+    let active = true;
+    createClient().auth.getUser().then(({ data }) => {
+      if (active) setSignedIn(!!data.user);
+    });
+    return () => { active = false; };
+  }, []);
+
   async function handleConfirm() {
-  if (!startsAt || !available || !guestName.trim() || !guestPhone.trim()) return;
+  if (!startsAt || !available || (!signedIn && (!guestName.trim() || !guestPhone.trim()))) return;
   setStep("holding");
   setHoldSeconds(15 * 60);
 
@@ -98,12 +112,12 @@ export function BookingDrawer({ court, date, blocks, onClose }: Props) {
         {step === "select" && (
           <div className="space-y-4">
             <div>
-              <label className="mb-1 block text-sm font-medium text-ash">Your name</label>
+              <label className="mb-1 block text-sm font-medium text-ash">Your name {signedIn && <span className="font-normal">(optional)</span>}</label>
               <input value={guestName} onChange={(e) => setGuestName(e.target.value)} className="w-full rounded-card border border-line px-3 py-2.5" placeholder="Juan dela Cruz" />
             </div>
 
             <div>
-              <label className="mb-1 block text-sm font-medium text-ash">Mobile number</label>
+              <label className="mb-1 block text-sm font-medium text-ash">Mobile number {signedIn && <span className="font-normal">(optional)</span>}</label>
               <input value={guestPhone} onChange={(e) => setGuestPhone(e.target.value)} className="w-full rounded-card border border-line px-3 py-2.5" placeholder="09XX XXX XXXX" inputMode="tel" />
             </div>
 
@@ -115,11 +129,12 @@ export function BookingDrawer({ court, date, blocks, onClose }: Props) {
                 className="w-full rounded-card border border-line px-3 py-2.5"
               >
                 <option value="">Select a time</option>
-                {timeOptions.map((t) => (
-                  <option key={t} value={t}>
-                    {formatTime(t)}
+                {timeOptions.map((t) => {
+                  const free = isStartAvailable(t);
+                  return <option key={t} value={t} disabled={!free} className={!free ? "text-red-600" : ""}>
+                    {formatTime(t)}{free ? "" : " — BOOKED"}
                   </option>
-                ))}
+                })}
               </select>
             </div>
 
@@ -160,7 +175,7 @@ export function BookingDrawer({ court, date, blocks, onClose }: Props) {
 
             <button
               onClick={handleConfirm}
-              disabled={!startsAt || !available || !guestName.trim() || !guestPhone.trim()}
+              disabled={!startsAt || !available || (!signedIn && (!guestName.trim() || !guestPhone.trim()))}
               className="w-full rounded-card bg-court py-3 font-semibold text-white transition-colors hover:bg-court-light disabled:cursor-not-allowed disabled:bg-line disabled:text-ash"
             >
               Continue to payment

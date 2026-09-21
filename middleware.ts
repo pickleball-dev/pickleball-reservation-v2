@@ -44,6 +44,13 @@ export async function middleware(request: NextRequest) {
     if (!profile || (profile.role !== "staff" && profile.role !== "admin")) {
       return NextResponse.redirect(new URL("/", request.url));
     }
+
+    // Personal data and financial reports are administrator-only, even when a
+    // staff member enters the URL directly.
+    const adminOnlyPaths = ["/admin/customers", "/admin/team", "/admin/sales"];
+    if (adminOnlyPaths.some((path) => request.nextUrl.pathname.startsWith(path)) && profile.role !== "admin") {
+      return NextResponse.redirect(new URL("/admin", request.url));
+    }
   }
 
   if (request.nextUrl.pathname.startsWith("/my-bookings") && !user) {
