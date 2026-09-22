@@ -8,3 +8,6 @@ out
 .DS_Store
 .vercel
 next-env.d.ts
+
+tsconfig.tsbuildinfo
+desktop.ini
