@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { formatTime, formatDate, isSameDay } from "@/lib/availability";
 import { AutoRefresh } from "@/components/AutoRefresh";
@@ -8,7 +7,10 @@ function playerName(row: any) {
   return row.guest_name || row.profiles?.full_name || "Account customer";
 }
 
-export default async function CourtUsagePage() {
+// Always hit the DB fresh — this page is meant to sit open on a monitor for hours.
+export const dynamic = "force-dynamic";
+
+export default async function CourtMonitorPage() {
   const supabase = createClient();
   const now = new Date().toISOString();
 
@@ -25,56 +27,42 @@ export default async function CourtUsagePage() {
   const rows: any[] = reservations ?? [];
 
   return (
-    <div>
-      <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+    <div className="min-h-screen bg-court-dark px-10 py-8 text-white">
+      <div className="mb-8 flex items-center justify-between">
         <div>
-          <p className="text-sm font-semibold uppercase tracking-[0.14em] text-court">Live operations</p>
-          <h1 className="mt-1 font-display text-3xl font-bold">Live court queue</h1>
-          <p className="mt-1 text-sm text-ash">
-            Each court shows the active booking and the next scheduled player without staff needing to check a separate list.
-          </p>
+          <p className="text-sm font-semibold uppercase tracking-[0.2em] text-ball">Live operations · Monitor</p>
+          <h1 className="mt-1 font-display text-4xl font-bold">Live court queue</h1>
         </div>
         <AutoRefresh intervalMs={15000} />
       </div>
 
-      <div className="overflow-hidden rounded-card border border-line bg-surface shadow-card">
-        {(courts ?? []).map((court, i) => {
+      <div className="grid gap-4">
+        {(courts ?? []).map((court) => {
           const current = rows.find((r) => r.court_id === court.id && r.starts_at <= now && r.ends_at > now);
           const next = rows.find((r) => r.court_id === court.id && r.starts_at > now);
           const isDown = court.status !== "active";
 
           return (
-            <div
-              key={court.id}
-              className={`flex flex-wrap items-center gap-x-6 gap-y-2 px-5 py-4 ${i > 0 ? "border-t border-line" : ""}`}
-            >
-              <Link
-                href="/admin/court-usage/monitor"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-24 shrink-0 font-display text-lg font-bold text-ink underline decoration-line underline-offset-4 hover:text-court"
-                title="Open the full-screen monitor view in a new tab"
-              >
-                {court.name}
-              </Link>
+            <div key={court.id} className="flex flex-wrap items-center gap-x-10 gap-y-3 rounded-card bg-white/5 px-8 py-6">
+              <p className="w-40 shrink-0 font-display text-3xl font-bold">{court.name}</p>
 
               <span
-                className={`shrink-0 rounded-md px-2.5 py-1 text-xs font-bold uppercase tracking-wide ${
-                  isDown ? "bg-clay/10 text-clay" : current ? "bg-ball text-ink" : "bg-court/10 text-court"
+                className={`shrink-0 rounded-md px-4 py-2 text-base font-bold uppercase tracking-wide ${
+                  isDown ? "bg-clay text-white" : current ? "bg-ball text-ink" : "bg-court-light text-ball"
                 }`}
               >
                 {isDown ? court.status : current ? "In play" : "Available"}
               </span>
 
-              <span className="w-36 shrink-0 truncate font-semibold text-ink">
+              <p className="w-56 shrink-0 truncate font-display text-2xl font-semibold">
                 {current ? playerName(current) : "—"}
-              </span>
+              </p>
 
-              <span className="w-28 shrink-0 text-sm font-semibold text-court">
+              <p className="w-40 shrink-0 text-xl font-semibold text-ball">
                 {current ? <CourtCountdown endsAt={current.ends_at} /> : "Open now"}
-              </span>
+              </p>
 
-              <span className="ml-auto text-sm text-ash">
+            <p className="ml-auto text-lg text-white/70">
                 {next ? (
                   <>
                     Next: {playerName(next)} ·{" "}
@@ -83,7 +71,7 @@ export default async function CourtUsagePage() {
                 ) : (
                   "No one queued"
                 )}
-              </span>
+            </p>
             </div>
           );
         })}

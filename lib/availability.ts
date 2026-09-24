@@ -44,3 +44,11 @@ export function generateTimeOptions(date: string, openTime: string, closeTime: s
 export function formatTime(iso: string): string {
   return new Date(iso).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" });
 }
+
+export function formatDate(iso: string): string {
+  return new Date(iso).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+}
+
+export function isSameDay(aIso: string, bIso: string): boolean {
+  return new Date(aIso).toDateString() === new Date(bIso).toDateString();
+}
