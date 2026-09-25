@@ -1,23 +1,22 @@
 import { createClient } from "@/lib/supabase/server";
-import { formatTime } from "@/lib/availability";
+import { formatTime, manilaDayBounds } from "@/lib/availability";
 import { formatPeso } from "@/lib/pricing";
 import clsx from "clsx";
 import Link from "next/link";
 
 export default async function AdminDashboard() {
   const supabase = createClient();
-  const todayStart = new Date();
-  todayStart.setHours(0, 0, 0, 0);
-  const todayEnd = new Date();
-  todayEnd.setHours(23, 59, 59, 999);
+  const { start: todayStart, end: todayEnd } = manilaDayBounds(
+    new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Manila", year: "numeric", month: "2-digit", day: "2-digit" }).format(new Date())
+  );
 
   const { data: courts } = await supabase.from("courts").select("*").order("sort_order");
 
   const { data: reservations } = await supabase
     .from("reservations")
     .select("*, courts(name), profiles(full_name)")
-    .gte("starts_at", todayStart.toISOString())
-    .lte("starts_at", todayEnd.toISOString())
+    .gte("starts_at", todayStart)
+    .lt("starts_at", todayEnd)
     .in("status", ["pending_payment", "confirmed"])
     .order("starts_at");
   const { count: pendingPayments } = await supabase
@@ -36,7 +35,7 @@ export default async function AdminDashboard() {
     <div>
       <div className="mb-7 flex flex-col justify-between gap-3 sm:flex-row sm:items-end"><div><p className="text-sm font-semibold uppercase tracking-[0.14em] text-court">Operations overview</p><h1 className="mt-1 font-display text-3xl font-bold">Good day, admin.</h1>
       <p className="mt-1 text-sm text-ash">
-        {todayStart.toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" })}
+        {new Date(todayStart).toLocaleDateString("en-PH", { timeZone: "Asia/Manila", weekday: "long", month: "long", day: "numeric" })}
       </p></div><Link href="/admin/payments" className="rounded-card bg-court px-4 py-3 text-center text-sm font-semibold text-white shadow-card">Review payments →</Link></div>
 
       <section className="mb-7 grid grid-cols-2 gap-3 lg:grid-cols-4"><Metric label="Active courts" value={`${(courts ?? []).filter(c => c.status === "active").length}/5`} tone="court" /><Metric label="Today&apos;s bookings" value={String(reservations?.length ?? 0)} /><Metric label="Pending payments" value={String(pendingPayments ?? 0)} tone="ball" /><Metric label="Confirmed today" value={String(reservations?.filter(r => r.status === "confirmed").length ?? 0)} /></section>

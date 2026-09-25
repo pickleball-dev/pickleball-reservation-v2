@@ -5,9 +5,10 @@ import { CourtCard } from "./CourtCard";
 import { BookingDrawer } from "./BookingDrawer";
 import type { AvailabilityBlock, Court } from "@/lib/types";
 import { AccountNav } from "./AccountNav";
+import { todayInManila } from "@/lib/availability";
 
 function todayISODate(): string {
-  return new Date().toISOString().slice(0, 10);
+  return todayInManila();
 }
 
 export function BookingApp() {

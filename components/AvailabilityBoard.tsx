@@ -1,8 +1,8 @@
 "use client";
 import { useEffect, useMemo, useState } from "react";
-import { formatTime, generateTimeOptions, isSlotAvailable } from "@/lib/availability";
+import { formatTime, generateTimeOptions, isSlotAvailable, todayInManila } from "@/lib/availability";
 import type { AvailabilityBlock, Court } from "@/lib/types";
-const today = () => new Date().toISOString().slice(0, 10);
+const today = todayInManila;
 export function AvailabilityBoard() {
   const [date, setDate] = useState(today()); const [courts, setCourts] = useState<Court[]>([]); const [blocks, setBlocks] = useState<AvailabilityBlock[]>([]); const [loading, setLoading] = useState(true);
   useEffect(() => { setLoading(true); fetch(`/api/courts?date=${date}`).then(r => r.json()).then(d => { setCourts((d.courts ?? []).map((c: any) => ({ id: c.id, name: c.name, hourlyRate: c.hourly_rate, status: c.status }))); setBlocks((d.blocks ?? []).map((b: any) => ({ courtId: b.court_id, startsAt: b.starts_at, endsAt: b.ends_at, kind: b.kind }))); }).finally(() => setLoading(false)); }, [date]);

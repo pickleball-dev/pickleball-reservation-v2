@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient, createServiceRoleClient } from "@/lib/supabase/server";
+import { manilaDayBounds } from "@/lib/availability";
 
 // GET /api/courts?date=2026-09-10
 // Returns each active court plus the availability blocks (reservations +
@@ -18,8 +19,7 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: "Missing or invalid ?date=YYYY-MM-DD" }, { status: 400 });
   }
 
-  const dayStart = new Date(`${date}T00:00:00`).toISOString();
-  const dayEnd = new Date(`${date}T23:59:59.999`).toISOString();
+  const { start: dayStart, end: dayEnd } = manilaDayBounds(date);
 
   const [{ data: courts, error: courtsError }, { data: blocks, error: blocksError }] =
     await Promise.all([
